@@ -1,4 +1,4 @@
-# 👋 Hi there, I’m Serhat Dalmış (@seroserosero123123)
+# 👋 Hi there, I’m Serhat Dalmış (@serhatcan123)
 
 🚀 **Aerospace Engineering Student & Aspiring Space Systems Engineer**  
 I'm currently diving deep into the fascinating world of **orbital mechanics**, **satellite simulation**, and **space system design**. With a strong passion for space technology, I enjoy creating innovative tools and working on cutting-edge projects that make an impact in the aerospace industry.
