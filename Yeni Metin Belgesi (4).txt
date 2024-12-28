@@ -426,7 +426,7 @@ def add_custom_fuel():
     custom_cstar_entry = ttk.Entry(custom_window, width=25)
     custom_cstar_entry.grid(row=2, column=1, padx=10, pady=10)
 
-    ttk.Button(custom_window, text="Ekle", command=save_custom_fuel).grid(row=3, column=0, columnspan=2, pady=20)
+    ttk.Button(custom_window, text="Ekle", command=save_custom_fuel).grid(row=3, column=0, columnspan=2, pady=20, sticky="ew")
 
 def optimize_parameters_function(target_thrust):
     """
@@ -507,7 +507,7 @@ def optimize_parameters_function(target_thrust):
 
             # Sonuçları güncelle
             chamber_pressure_entry.delete(0, tk.END)
-            chamber_pressure_entry.insert(0, f"{chamber_pressure:.2f}")
+            chamber_pressure_entry.insert(0, f"{chamber_pressure:.2f} Pa")
 
             messagebox.showinfo("Başarılı",
                                 f"Parametreler hedef itki kuvvetine ulaşmak için optimize edildi.\nYeni Yanma Odası Basıncı: {chamber_pressure:.2f} Pa")
@@ -1026,10 +1026,12 @@ def on_solid_fuel_selected(event):
         cstar_entry.delete(0, tk.END)
 
 # -------------------- Birim Seçimi Fonksiyonları --------------------
-def create_unit_selection():
+def create_unit_selection(mainframe):
     """
     Kullanıcıların birim sistemlerini seçmelerine izin veren arayüz elemanlarını oluşturur.
     """
+    global length_unit_var, pressure_unit_var, mass_unit_var, temperature_unit_var, force_unit_var
+
     unit_frame = ttk.LabelFrame(mainframe, text="Birim Seçimi")
     unit_frame.grid(row=5, column=0, columnspan=2, pady=10, sticky="ew")
 
@@ -1069,10 +1071,12 @@ def create_unit_selection():
     force_unit_combo.set("N")  # Varsayılan
 
 # -------------------- Kullanıcı Profili Arayüzü --------------------
-def create_profile_management():
+def create_profile_management(mainframe):
     """
     Kullanıcıların profillerini kaydetme ve yükleme arayüzünü oluşturur.
     """
+    global save_profile, load_profile, open_optimization_window
+
     profile_frame = ttk.LabelFrame(mainframe, text="Kullanıcı Profilleri")
     profile_frame.grid(row=6, column=0, columnspan=2, pady=10, sticky="ew")
 
@@ -1081,109 +1085,18 @@ def create_profile_management():
 
     ttk.Button(profile_frame, text="Parametre Optimizasyonu", command=open_optimization_window).grid(row=1, column=0, columnspan=2, pady=5, sticky="ew")
 
-def open_optimization_window():
-    """
-    Kullanıcıya hedef itki kuvveti girmesini sağlayan pencereyi açar.
-    """
-
-    def perform_optimization():
-        target_thrust = target_entry.get()
-        if not target_thrust:
-            messagebox.showerror("Hata", "Lütfen hedef itki kuvvetini giriniz.")
-            return
-        optimize_parameters_function(target_thrust)
-
-    optimize_window = tk.Toplevel(root)
-    optimize_window.title("Parametre Optimizasyonu")
-    optimize_window.geometry("300x150")
-
-    ttk.Label(optimize_window, text="Hedef İtki Kuvveti (N veya lbf):").pack(padx=10, pady=20)
-    target_entry = ttk.Entry(optimize_window, width=20)
-    target_entry.pack(padx=10, pady=5)
-
-    ttk.Button(optimize_window, text="Optimizasyonu Başlat", command=perform_optimization).pack(pady=10)
-
-# -------------------- Sonuç Gösterme ve Hesaplama Detayları --------------------
-# Sonuç Gösterme
-result_text = tk.StringVar()
-result_label = ttk.Label(right_frame, textvariable=result_text, foreground="blue", justify="left", anchor="nw")
-result_label.pack(fill='both', expand=True, padx=10, pady=10)
-
-# Hesaplama Detayları İçin Checkbox ve Metin Kutusu
-details_frame = ttk.Frame(right_frame)
-details_frame.pack(pady=5, fill='x', padx=10)
-
-show_details_var = tk.BooleanVar()
-show_details_check = ttk.Checkbutton(details_frame, text="Hesaplama Detaylarını Göster", variable=show_details_var,
-                                     command=lambda: toggle_details())
-show_details_check.pack(side='left')
-
-calculation_details_text = tk.Text(right_frame, wrap="word", height=15, state=tk.DISABLED, background="#f0f0f0")
-calculation_details_text.pack(fill='both', expand=True, padx=10, pady=5)
-
-def toggle_details():
-    """
-    Checkbox durumuna göre hesaplama detaylarını gösterir veya gizler.
-    """
-    if show_details_var.get():
-        calculation_details_text.pack(fill='both', expand=True, padx=10, pady=5)
-    else:
-        calculation_details_text.pack_forget()
-
-# -------------------- Uygulama Başlatma --------------------
+# -------------------- TKINTER ARAYÜZ KURULUMU --------------------
 def main():
-    # Katı yakıt türleri ve varsayılan parametreler
-    solid_fuels = {
-        "HTPB": (0.01, 1600),  # (burn_rate [m/s], c_star [m/s])
-        "Nitrocellulose": (0.005, 1500),
-        "Ammonium Perchlorate": (0.015, 1700)
-    }
+    global root, rocket_type_var, length_unit_var, pressure_unit_var, mass_unit_var, temperature_unit_var, force_unit_var
+    global pair_var, solid_fuel_var
+    global chamber_pressure_entry, exit_pressure_entry, chamber_temperature_entry, throat_diameter_entry, exit_diameter_entry, ambient_pressure_entry
+    global solid_fuel_combo, length_entry, thickness_entry, burn_rate_entry, cstar_entry
+    global burn_time_entry, time_step_entry
+    global result_text, show_details_var, calculation_details_text
+    global calculate_button, thrust_list, m_dot_list, exit_vel_list, time_points
+    global last_calculated_thrust, last_calculated_m_dot, last_calculated_exit_vel
+    global last_burn_rate, last_thickness, last_chamber_pressure
 
-    # Katı yakıt türleri için varsayılan parametreler
-    solid_fuel_defaults = {
-        "HTPB": {
-            "yakıt_uzunluğu": "0.5",  # m
-            "yakıt_kalınlığı": "0.2",  # m
-            "yanma_hızı": "0.01",  # m/s
-            "karakteristik_hız": "1600"  # m/s
-        },
-        "Nitrocellulose": {
-            "yakıt_uzunluğu": "0.6",  # m
-            "yakıt_kalınlığı": "0.035",  # m
-            "yanma_hızı": "0.006",  # m/s
-            "karakteristik_hız": "1500"  # m/s
-        },
-        "Ammonium Perchlorate": {
-            "yakıt_uzunluğu": "0.55",  # m
-            "yakıt_kalınlığı": "0.037",  # m
-            "yanma_hızı": "0.014",  # m/s
-            "karakteristik_hız": "1700"  # m/s
-        },
-        # İhtiyaç duyarsanız daha fazla yakıt türü ekleyebilirsiniz
-    }
-
-    # Sıvı yakıt türleri ve varsayılan parametreler
-    liquid_fuel_defaults = {
-        "RP-1 / LOX (355 J/kg*K, γ=1.21)": {
-            "yanma_odası_basıncı": "1e6",  # Pa
-            "egzoz_cıkış_basıncı": "101325",  # Pa
-            "yanma_odası_sıcaklığı": "3500",  # K
-            "boğaz_çapı": "51.6",  # mm
-            "egzoz_cıkış_çapı": "103.2",  # mm
-            "ortam_basıncı": "101325"  # Pa
-        },
-        "LH2 / LOX (4124 J/kg*K, γ=1.4)": {
-            "yanma_odası_basıncı": "2e6",  # Pa
-            "egzoz_cıkış_basıncı": "101325",  # Pa
-            "yanma_odası_sıcaklığı": "4000",  # K
-            "boğaz_çapı": "30",  # mm
-            "egzoz_cıkış_çapı": "60",  # mm
-            "ortam_basıncı": "101325"  # Pa
-        },
-        # Diğer sıvı yakıtlar için de benzer şekilde ekleyebilirsiniz
-    }
-
-    # TKINTER ARAYÜZ KURULUMU
     root = tk.Tk()
     root.title("Roket Motoru Hesaplama (Katı / Sıvı)")
     root.geometry("1000x700")  # Daha geniş bir pencere boyutu belirledik
@@ -1345,16 +1258,10 @@ def main():
     create_tooltip(time_step_entry, "Hesaplamaların yapılacağı zaman adımı (s)")
 
     # -------------------- Birim Seçimi Fonksiyonları --------------------
-    length_unit_var = tk.StringVar()
-    pressure_unit_var = tk.StringVar()
-    mass_unit_var = tk.StringVar()
-    temperature_unit_var = tk.StringVar()
-    force_unit_var = tk.StringVar()
-
-    create_unit_selection()
+    create_unit_selection(mainframe)
 
     # -------------------- Kullanıcı Profili Arayüzü --------------------
-    create_profile_management()
+    create_profile_management(mainframe)
 
     # -------------------- Sonuç Gösterme ve Hesaplama Detayları --------------------
     # Sonuç Gösterme
