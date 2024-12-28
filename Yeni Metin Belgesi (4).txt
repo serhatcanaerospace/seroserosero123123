@@ -24,7 +24,9 @@ def convert_units(value, from_unit, to_unit):
         ("kg", "lb"): 2.20462,
         ("lb", "kg"): 0.453592,
         ("K", "C"): lambda k: k - 273.15,
-        ("C", "K"): lambda c: c + 273.15
+        ("C", "K"): lambda c: c + 273.15,
+        ("N", "lbf"): 0.224809,
+        ("lbf", "N"): 4.44822
     }
 
     if from_unit == to_unit:
@@ -123,7 +125,8 @@ def save_profile():
             "length_unit": length_unit_var.get(),
             "pressure_unit": pressure_unit_var.get(),
             "mass_unit": mass_unit_var.get(),
-            "temperature_unit": temperature_unit_var.get()
+            "temperature_unit": temperature_unit_var.get(),
+            "force_unit": force_unit_var.get()
         }
     }
 
@@ -195,184 +198,11 @@ def load_profile():
             pressure_unit_var.set(birimler.get("pressure_unit", "Pa"))
             mass_unit_var.set(birimler.get("mass_unit", "kg"))
             temperature_unit_var.set(birimler.get("temperature_unit", "K"))
+            force_unit_var.set(birimler.get("force_unit", "N"))
 
             messagebox.showinfo("Başarılı", "Profil başarıyla yüklendi.")
         except Exception as e:
             messagebox.showerror("Hata", f"Profil yüklenirken bir hata oluştu.\n{e}")
-
-def open_training_module():
-    """
-    Kullanıcıya eğitim modülünü gösterir. 5 sayfadan oluşur.
-    """
-    training_window = tk.Toplevel(root)
-    training_window.title("Eğitim Modülü")
-    training_window.geometry("600x500")
-
-    # Eğitim modülü için sayfa yönetimi
-    class TrainingModule:
-        def __init__(self, master):
-            self.master = master
-            self.current_page = 0
-            self.pages = []
-            self.create_pages()
-
-            # Navigation Buttons
-            nav_frame = ttk.Frame(master)
-            nav_frame.pack(pady=10)
-
-            self.prev_button = ttk.Button(nav_frame, text="Önceki", command=self.prev_page)
-            self.prev_button.grid(row=0, column=0, padx=5)
-            self.next_button = ttk.Button(nav_frame, text="Sonraki", command=self.next_page)
-            self.next_button.grid(row=0, column=1, padx=5)
-
-            self.display_page(self.current_page)
-
-        def create_pages(self):
-            """Eğitim modülü sayfalarını oluşturur."""
-            contents = [
-                r"""
-**Roket Motoru Tasarımı ve Hesaplamaları - Sayfa 1**
-
-### **1. Roket Motorunun Temel Bileşenleri**
-- **Yanma Odası:** Yakıt ve oksitleyicinin karışıp yandığı bölge.
-- **Boğaz:** Yanma odasından egzoza doğru daralan nozul bölgesi.
-- **Nozzle (Egzoz):** Gazların hızla dışarı atıldığı genişleyen nozul bölgesi.
-- **Yakıt ve Oksitleyici Depoları:** Yakıt ve oksitleyicilerin saklandığı depolar.
-
-### **Kaynaklar ve Daha Fazlası**
-- [NASA Rocket Propulsion](https://www.nasa.gov/mission_pages/launch/rockets.html)
-- [Wikipedia - Roket Motoru](https://tr.wikipedia.org/wiki/Roket_motoru)
-""",
-                r"""
-**Roket Motoru Tasarımı ve Hesaplamaları - Sayfa 2**
-
-### **2. Roket Motoru Tasarım Prensipleri**
-- **Kütle Akış Hızı (ṁ):** Yanma odasından geçerek egzoza çıkan yakıtın kütle miktarı.
-- **Egzoz Hızı (v_e):** Yakıtın yanması sonucu oluşan gazların hızıdır.
-- **İtki Kuvveti (F):** Roket motorunun ürettiği kuvvet. 
-  \[ F = (\dot{m} \cdot v_e) + (P_e - P_a) \cdot A_e \]
-
-### **Termodinamik İlkeler**
-- **Isotermik ve Adyabatik Prosesler:** Yanma sürecinde ısı transferi ve basınç değişimleri.
-- **Spesifik Gaz Sabiti (R):** Gazın özelliğine bağlı sabit.
-- **Isı Kapasitesi Oranları (γ):** Gazın termodinamik davranışını belirler.
-
-### **Kaynaklar ve Daha Fazlası**
-- [Roket Bilimi ve Teknolojisi](https://www.sciencedirect.com/topics/engineering/rocket-propulsion)
-- [Wikipedia - Termodinamik](https://tr.wikipedia.org/wiki/Termodinamik)
-""",
-                r"""
-**Roket Motoru Tasarımı ve Hesaplamaları - Sayfa 3**
-
-### **3. Termodinamik Hesaplamalar**
-- **Egzoz Hızı Hesaplaması:**
-  \[ v_e = \sqrt{\frac{2 \gamma}{\gamma - 1} R T_c \left(1 - \left(\frac{P_e}{P_c}\right)^{\frac{\gamma - 1}{\gamma}}\right)} \]
-- **Kütle Akış Hızı Hesaplaması:**
-  \[ \dot{m} = \rho \cdot A_t \cdot \sqrt{\gamma \cdot R \cdot T_t} \]
-- **İtki Kuvveti Hesaplaması:**
-  \[ F = (\dot{m} \cdot v_e) + (P_e - P_a) \cdot A_e \]
-
-### **Gaz Dinamikleri**
-- **Choked Flow (Daralma Akışı):** Boğaz alanında maksimum kütle akış hızı.
-- **Mach Sayısı:** Hızın ses hızına oranı.
-- **Reynolds Sayısı:** Akışın laminer veya türbülanslı olup olmadığını belirler.
-
-### **Kaynaklar ve Daha Fazlası**
-- [Thermodynamics in Rocket Engines](https://www.grc.nasa.gov/www/k-12/airplane/mach.html)
-- [Wikipedia - Termodinamik](https://tr.wikipedia.org/wiki/Termodinamik)
-""",
-                r"""
-**Roket Motoru Tasarımı ve Hesaplamaları - Sayfa 4**
-
-### **4. Nozzle Tasarımı ve Egzoz Hızı**
-- **Nozzle Tipleri:**
-  - **De Laval Nozzle:** Dar boğaz ve geniş egzoz bölgesi ile yüksek egzoz hızları sağlar.
-  - **Conical Nozzle:** Basit yapılı, düşük performanslı nozul.
-  - **Bell Nozzle:** Yüksek verimlilik ve düşük ses emisyonları için optimize edilmiş nozul.
-- **Egzoz Hızı Optimizasyonu:**
-  - Nozzle genişleme oranının (exit diameter / throat diameter) doğru ayarlanması.
-  - Ortam basıncı ile egzoz çıkış basıncının dengelenmesi.
-
-### **Pratik Örnekler ve Hesaplamalar**
-- **Örnek Hesaplama:** RP-1 / LOX çiftli bir roket motoru için itki kuvveti hesaplaması.
-- **Grafiklerin Analizi:** İtki kuvveti, kütle akış hızı ve egzoz hızı zamanla nasıl değişir.
-
-### **Kaynaklar ve Daha Fazlası**
-- [Rocket Nozzle Design](https://www.grc.nasa.gov/www/k-12/airplane/nozzle.html)
-- [Wikipedia - Rocket Nozzle](https://tr.wikipedia.org/wiki/Roket_nozulu)
-""",
-                r"""
-**Roket Motoru Tasarımı ve Hesaplamaları - Sayfa 5**
-
-### **5. Performans Optimizasyonu ve Kaynaklar**
-- **Performans Optimizasyonu:**
-  - Hedef itki kuvvetine ulaşmak için parametrelerin ayarlanması.
-  - Yanma hızı, yakıt kalınlığı ve yanma odası basıncının optimizasyonu.
-- **Optimizasyon Yöntemleri:**
-  - Matematiksel yöntemler (Örneğin, Newton-Raphson Yöntemi).
-  - Simülasyon ve modelleme teknikleri.
-- **Güvenlik ve Testler:**
-  - Roket motoru testlerinin güvenli bir şekilde gerçekleştirilmesi.
-  - Malzeme seçimi ve dayanıklılık analizleri.
-
-### **Ek Kaynaklar ve Okumalar**
-- [Rocket Propulsion Elements by George P. Sutton](https://www.amazon.com/Rocket-Propulsion-Elements-George-Sutton/dp/0071388449)
-- [NASA Glenn Research Center - Rocket Propulsion](https://www.grc.nasa.gov/www/k-12/airplane/rocket.html)
-- [Wikipedia - Rocket Design](https://tr.wikipedia.org/wiki/Roket_tasarımı)
-- [AIAA (American Institute of Aeronautics and Astronautics)](https://www.aiaa.org/)
-- [SpaceX Research and Development](https://www.spacex.com/research)
-
-### **Sonuç**
-Roket motoru tasarımı ve hesaplamaları, kapsamlı bir bilgi birikimi ve dikkatli planlama gerektirir. Bu eğitim modülü ile temel prensipleri anlamış ve pratik uygulamalar için gerekli araçlara sahip olabilirsiniz.
-"""
-            ]
-
-            for content in contents:
-                frame = tk.Frame(self.master, background="#f0f0f0")
-                text_widget = tk.Text(frame, wrap="word", padx=10, pady=10, background="#f0f0f0")
-                text_widget.insert(tk.END, content)
-                text_widget.config(state=tk.DISABLED)
-                text_widget.pack(expand=True, fill='both')
-                self.pages.append(frame)
-
-        def display_page(self, page_number):
-            """Belirli bir sayfayı gösterir."""
-            for i, page in enumerate(self.pages):
-                if i == page_number:
-                    page.pack(fill='both', expand=True, padx=10, pady=10)
-                else:
-                    page.pack_forget()
-
-            # Navigation Buttons'ın durumunu ayarla
-            if self.current_page == 0:
-                self.prev_button.config(state='disabled')
-            else:
-                self.prev_button.config(state='normal')
-
-            if self.current_page == len(self.pages) - 1:
-                self.next_button.config(text="Kapat", command=self.close_window)
-            else:
-                self.next_button.config(text="Sonraki", command=self.next_page)
-
-        def next_page(self):
-            """Sonraki sayfaya geçiş yapar veya pencereyi kapatır."""
-            if self.current_page < len(self.pages) - 1:
-                self.current_page += 1
-                self.display_page(self.current_page)
-            else:
-                self.close_window()
-
-        def prev_page(self):
-            """Önceki sayfaya geçiş yapar."""
-            if self.current_page > 0:
-                self.current_page -= 1
-                self.display_page(self.current_page)
-
-        def close_window(self):
-            """Eğitim modülü penceresini kapatır."""
-            self.master.destroy()
-
-    TrainingModule(training_window)
 
 def open_training_module():
     """
@@ -739,6 +569,7 @@ def calculate_thrust_for_pressure(chamber_pressure):
         raise ValueError(f"Hesaplama sırasında bir hata oluştu: {ve}")
     except Exception as e:
         raise Exception(f"Beklenmeyen bir hata oluştu: {e}")
+
 def plot_thrust_graph():
     """
     İtki Kuvveti Grafiğini çizer ve yeni bir pencere açar.
@@ -754,7 +585,7 @@ def plot_thrust_graph():
     fig, ax = plt.subplots(figsize=(6, 4))
     ax.plot(time_points, thrust_list, color='tab:blue')
     ax.set_xlabel('Zaman (s)')
-    ax.set_ylabel('İtki Kuvveti (N)')
+    ax.set_ylabel(f'İtki Kuvveti ({force_unit_var.get()})')
     ax.set_title('İtki Kuvveti Zaman Serisi')
     ax.grid(True)
 
@@ -777,7 +608,7 @@ def plot_mass_flow_graph():
     fig, ax = plt.subplots(figsize=(6, 4))
     ax.plot(time_points, m_dot_list, color='tab:green')
     ax.set_xlabel('Zaman (s)')
-    ax.set_ylabel('Kütle Akış Hızı (kg/s)')
+    ax.set_ylabel(f'Kütle Akış Hızı ({mass_unit_var.get()}/s)')
     ax.set_title('Kütle Akış Hızı Zaman Serisi')
     ax.grid(True)
 
@@ -800,7 +631,7 @@ def plot_exit_velocity_graph():
     fig, ax = plt.subplots(figsize=(6, 4))
     ax.plot(time_points, exit_vel_list, color='tab:red')
     ax.set_xlabel('Zaman (s)')
-    ax.set_ylabel('Egzoz Hızı (m/s)')
+    ax.set_ylabel(f'Egzoz Hızı ({length_unit_var.get()}/s)')
     ax.set_title('Egzoz Hızı Zaman Serisi')
     ax.grid(True)
 
@@ -811,6 +642,7 @@ def plot_exit_velocity_graph():
 def calculate():
     """
     Kullanıcı tarafından girilen parametrelere göre hesaplamaları yapar ve sonuçları günceller.
+    Ayrıca yapılan işlemleri detaylı olarak gösteren bir metin kutusu ekler.
     """
     global last_calculated_thrust, last_calculated_m_dot, last_calculated_exit_vel
     global last_burn_rate, last_thickness, last_chamber_pressure
@@ -829,6 +661,7 @@ def calculate():
     pressure_unit = pressure_unit_var.get()
     mass_unit = mass_unit_var.get()
     temperature_unit = temperature_unit_var.get()
+    force_unit = force_unit_var.get()
 
     # Yeni Girdiler
     try:
@@ -849,6 +682,9 @@ def calculate():
 
     # Zaman Dizisi Oluştur
     time_points = np.arange(0, burn_time + time_step, time_step)
+
+    # Hesaplama Detaylarını Toplamak için bir liste
+    calculation_steps = []
 
     if chosen_type == "Sıvı Yakıt":
         try:
@@ -879,10 +715,15 @@ def calculate():
                 raise ValueError("Geçersiz yakıt/oksitleyici çifti.")
 
             specific_gas_constant, gamma = fuel_oxidizer_pairs[fuel_oxidizer_pair]
+            calculation_steps.append(f"Seçilen Yakıt/Oksitleyici Çifti: {fuel_oxidizer_pair}")
+            calculation_steps.append(f"Spesifik Gaz Sabiti (R): {specific_gas_constant} J/kg*K")
+            calculation_steps.append(f"Isı Kapasitesi Oranı (γ): {gamma}")
 
             # Boğaz ve egzoz alanları
             throat_area = math.pi * (throat_diameter / 2) ** 2
             exit_area = math.pi * (exit_diameter / 2) ** 2
+            calculation_steps.append(f"Boğaz Alanı (A_t): {throat_area:.4f} m²")
+            calculation_steps.append(f"Egzoz Alanı (A_e): {exit_area:.4f} m²")
 
             for t in time_points:
                 # Parametrelerin zamanla değişmediğini varsayıyoruz.
@@ -893,46 +734,74 @@ def calculate():
                 thrust = calculate_thrust_liquid(m_dot, exit_vel,
                                                 exit_pressure, exit_area, ambient_pressure)
 
+                # Birim dönüşümleri burada uygula
+                original_m_dot = m_dot
+                original_thrust = thrust
+                if mass_unit == "lb":
+                    m_dot = convert_units(m_dot, "kg", "lb")
+                if length_unit == "ft":
+                    exit_vel = convert_units(exit_vel, "m", "ft")
+                if force_unit == "lbf":
+                    thrust = convert_units(thrust, "N", "lbf")
+
+                # Hesaplama adımlarını kaydet
+                calculation_steps.append(f"\nZaman: {t} s")
+                calculation_steps.append(f"Kütle Akış Hızı: {original_m_dot:.4f} kg/s -> {m_dot:.4f} {mass_unit}/s")
+                calculation_steps.append(f"Egzoz Hızı: {exit_vel:.4f} {length_unit}/s")
+                calculation_steps.append(f"İtki Kuvveti: {original_thrust:.4f} N -> {thrust:.4f} {force_unit}")
+
                 thrust_list.append(thrust)
                 m_dot_list.append(m_dot)
                 exit_vel_list.append(exit_vel)
 
             # Toplam İtki Hesaplama
             total_impulse = sum([f * time_step for f in thrust_list])
+            calculation_steps.append(f"\nToplam İtki (Impulse): {total_impulse:.2f} Ns")
 
             # Toplam Yakıt Tüketimi Hesaplama
             total_mass_consumed = last_calculated_m_dot * burn_time  # Eğer m_dot sabitse
+            calculation_steps.append(f"Toplam Yakıt Tüketimi: {total_mass_consumed:.2f} kg")
 
             # Birimleri dönüştür
-            if mass_unit == "lb":
-                m_dot_list = [convert_units(m, "kg", "lb") for m in m_dot_list]
             if pressure_unit == "psi":
                 chamber_pressure_converted = convert_units(chamber_pressure, "Pa", "psi")
                 exit_pressure_converted = convert_units(exit_pressure, "Pa", "psi")
                 ambient_pressure_converted = convert_units(ambient_pressure, "Pa", "psi")
+                calculation_steps.append(f"Yanma Odası Basıncı: {chamber_pressure:.2f} Pa -> {chamber_pressure_converted:.2f} psi")
+                calculation_steps.append(f"Egzoz Çıkış Basıncı: {exit_pressure:.2f} Pa -> {exit_pressure_converted:.2f} psi")
+                calculation_steps.append(f"Ortam Basıncı: {ambient_pressure:.2f} Pa -> {ambient_pressure_converted:.2f} psi")
             else:
                 chamber_pressure_converted = chamber_pressure
                 exit_pressure_converted = exit_pressure
                 ambient_pressure_converted = ambient_pressure
+                calculation_steps.append(f"Yanma Odası Basıncı: {chamber_pressure:.2f} Pa")
+                calculation_steps.append(f"Egzoz Çıkış Basıncı: {exit_pressure:.2f} Pa")
+                calculation_steps.append(f"Ortam Basıncı: {ambient_pressure:.2f} Pa")
             if length_unit == "ft":
                 throat_diameter_converted = convert_units(throat_diameter, "m", "ft")
                 exit_diameter_converted = convert_units(exit_diameter, "m", "ft")
+                calculation_steps.append(f"Boğaz Çapı: {throat_diameter:.2f} m -> {throat_diameter_converted:.2f} ft")
+                calculation_steps.append(f"Egzoz Çıkış Çapı: {exit_diameter:.2f} m -> {exit_diameter_converted:.2f} ft")
             else:
                 throat_diameter_converted = throat_diameter
                 exit_diameter_converted = exit_diameter
+                calculation_steps.append(f"Boğaz Çapı: {throat_diameter:.2f} m")
+                calculation_steps.append(f"Egzoz Çıkış Çapı: {exit_diameter:.2f} m")
 
             if temperature_unit == "C":
                 chamber_temperature_converted = convert_units(chamber_temperature, "K", "C")
+                calculation_steps.append(f"Yanma Odası Sıcaklığı: {chamber_temperature:.2f} K -> {chamber_temperature_converted:.2f} C")
             else:
                 chamber_temperature_converted = chamber_temperature
+                calculation_steps.append(f"Yanma Odası Sıcaklığı: {chamber_temperature:.2f} K")
 
             # Sonuçları göster
             result_text.set(
                 f"Seçilen Yakıt: {fuel_oxidizer_pair}\n"
                 f"Toplam Yanma Süresi: {burn_time} s\n"
                 f"Kütle Akış Hızı (Ortalama): {np.mean(m_dot_list):.2f} {mass_unit}/s\n"
-                f"Egzoz Hızı (Ortalama): {np.mean(exit_vel_list):.2f} m/s\n"
-                f"İtki Kuvveti (Ortalama): {np.mean(thrust_list):.2f} N\n"
+                f"Egzoz Hızı (Ortalama): {np.mean(exit_vel_list):.2f} {length_unit}/s\n"
+                f"İtki Kuvveti (Ortalama): {np.mean(thrust_list):.2f} {force_unit}\n"
                 f"Toplam İtki: {total_impulse:.2f} Ns\n"
                 f"Toplam Yakıt Tüketimi: {total_mass_consumed:.2f} kg\n"
                 f"Yanma Odası Basıncı: {chamber_pressure_converted:.2f} {pressure_unit}\n"
@@ -942,6 +811,18 @@ def calculate():
                 f"Egzoz Çıkış Çapı: {exit_diameter_converted:.2f} {length_unit}\n"
                 f"Yanma Odası Sıcaklığı: {chamber_temperature_converted:.2f} {temperature_unit}"
             )
+
+            # Hesaplama detaylarını göstermek için
+            if show_details_var.get():
+                calculation_details_text.config(state=tk.NORMAL)
+                calculation_details_text.delete(1.0, tk.END)
+                for step in calculation_steps:
+                    calculation_details_text.insert(tk.END, step + "\n")
+                calculation_details_text.config(state=tk.DISABLED)
+            else:
+                calculation_details_text.config(state=tk.NORMAL)
+                calculation_details_text.delete(1.0, tk.END)
+                calculation_details_text.config(state=tk.DISABLED)
 
             # Global değişkenleri güncelle
             last_calculated_thrust = np.mean(thrust_list)
@@ -975,18 +856,41 @@ def calculate():
             if not (1400 <= cstar_val <= 2000):
                 messagebox.showwarning("Uyarı", "Karakteristik hız (c*) genellikle 1400 - 2000 m/s aralığındadır.")
 
+            # Hesaplama adımlarını kaydet
+            calculation_steps.append(f"Seçilen Katı Yakıt: {selected_fuel}")
+            calculation_steps.append(f"Yakıt Uzunluğu: {length:.2f} m")
+            calculation_steps.append(f"Yakıt Kalınlığı: {thickness:.2f} m")
+            calculation_steps.append(f"Yanma Hızı: {burn_rate:.4f} m/s")
+            calculation_steps.append(f"Karakteristik Hız (c*): {cstar_val:.2f} m/s")
+
             for t in time_points:
                 # Parametrelerin zamanla değişmediğini varsayıyoruz.
                 thrust, m_dot = calculate_solid_thrust(length, thickness, burn_rate, cstar_val)
+
+                # Birim dönüşümleri burada uygula
+                original_m_dot = m_dot
+                original_thrust = thrust
+                if mass_unit == "lb":
+                    m_dot = convert_units(m_dot, "kg", "lb")
+                if force_unit == "lbf":
+                    thrust = convert_units(thrust, "N", "lbf")
+
+                # Hesaplama adımlarını kaydet
+                calculation_steps.append(f"\nZaman: {t} s")
+                calculation_steps.append(f"Kütle Akış Hızı: {original_m_dot:.4f} kg/s -> {m_dot:.4f} {mass_unit}/s")
+                calculation_steps.append(f"İtki Kuvveti: {original_thrust:.4f} N -> {thrust:.4f} {force_unit}")
+
                 thrust_list.append(thrust)
                 m_dot_list.append(m_dot)
                 exit_vel_list.append(cstar_val)  # Katı yakıtta c* kullanıyoruz
 
             # Toplam İtki Hesaplama
             total_impulse = sum([f * time_step for f in thrust_list])
+            calculation_steps.append(f"\nToplam İtki (Impulse): {total_impulse:.2f} Ns")
 
             # Toplam Yakıt Tüketimi Hesaplama
             total_mass_consumed = last_calculated_m_dot * burn_time
+            calculation_steps.append(f"Toplam Yakıt Tüketimi: {total_mass_consumed:.2f} kg")
 
             # Birimleri dönüştür
             if mass_unit == "lb":
@@ -994,15 +898,19 @@ def calculate():
             if length_unit == "ft":
                 length_converted = convert_units(length, "m", "ft")
                 thickness_converted = convert_units(thickness, "m", "ft")
+                calculation_steps.append(f"Yakıt Uzunluğu: {length:.2f} m -> {length_converted:.2f} ft")
+                calculation_steps.append(f"Yakıt Kalınlığı: {thickness:.2f} m -> {thickness_converted:.2f} ft")
             else:
                 length_converted = length
                 thickness_converted = thickness
+                calculation_steps.append(f"Yakıt Uzunluğu: {length:.2f} m")
+                calculation_steps.append(f"Yakıt Kalınlığı: {thickness:.2f} m")
 
             # Sonuçları göster
             result_text.set(
                 f"Katı Yakıt Seçildi: {selected_fuel}\n"
                 f"Toplam Yanma Süresi: {burn_time} s\n"
-                f"İtki Kuvveti (Ortalama): {np.mean(thrust_list):.2f} N\n"
+                f"İtki Kuvveti (Ortalama): {np.mean(thrust_list):.2f} {force_unit}\n"
                 f"Kütle Akış Hızı (Ortalama): {np.mean(m_dot_list):.2f} {mass_unit}/s\n"
                 f"Karakteristik Hız (c*): {cstar_val:.2f} m/s\n"
                 f"Toplam İtki: {total_impulse:.2f} Ns\n"
@@ -1010,6 +918,18 @@ def calculate():
                 f"Yakıt Uzunluğu: {length_converted:.2f} {length_unit}\n"
                 f"Yakıt Kalınlığı: {thickness_converted:.2f} {length_unit}"
             )
+
+            # Hesaplama detaylarını göstermek için
+            if show_details_var.get():
+                calculation_details_text.config(state=tk.NORMAL)
+                calculation_details_text.delete(1.0, tk.END)
+                for step in calculation_steps:
+                    calculation_details_text.insert(tk.END, step + "\n")
+                calculation_details_text.config(state=tk.DISABLED)
+            else:
+                calculation_details_text.config(state=tk.NORMAL)
+                calculation_details_text.delete(1.0, tk.END)
+                calculation_details_text.config(state=tk.DISABLED)
 
             # Global değişkenleri güncelle
             last_calculated_thrust = np.mean(thrust_list)
@@ -1141,6 +1061,13 @@ def create_unit_selection():
     temperature_unit_combo.grid(row=3, column=1, padx=5, pady=5, sticky="ew")
     temperature_unit_combo.set("K")
 
+    # İtki Kuvveti Birimi
+    ttk.Label(unit_frame, text="İtki Kuvveti Birimi:").grid(row=4, column=0, sticky=tk.W, padx=5, pady=5)
+    force_unit_combo = ttk.Combobox(unit_frame, textvariable=force_unit_var,
+                                    values=["N", "lbf"], state="readonly")
+    force_unit_combo.grid(row=4, column=1, padx=5, pady=5, sticky="ew")
+    force_unit_combo.set("N")  # Varsayılan
+
 # -------------------- Kullanıcı Profili Arayüzü --------------------
 def create_profile_management():
     """
@@ -1170,264 +1097,314 @@ def open_optimization_window():
     optimize_window.title("Parametre Optimizasyonu")
     optimize_window.geometry("300x150")
 
-    ttk.Label(optimize_window, text="Hedef İtki Kuvveti (N):").pack(padx=10, pady=20)
+    ttk.Label(optimize_window, text="Hedef İtki Kuvveti (N veya lbf):").pack(padx=10, pady=20)
     target_entry = ttk.Entry(optimize_window, width=20)
     target_entry.pack(padx=10, pady=5)
 
     ttk.Button(optimize_window, text="Optimizasyonu Başlat", command=perform_optimization).pack(pady=10)
 
-# -------------------- Kullanıcı Profilleri --------------------
-# Katı yakıt türleri ve varsayılan parametreler
-solid_fuels = {
-    "HTPB": (0.01, 1600),  # (burn_rate [m/s], c_star [m/s])
-    "Nitrocellulose": (0.005, 1500),
-    "Ammonium Perchlorate": (0.015, 1700)
-}
-
-# Katı yakıt türleri için varsayılan parametreler
-solid_fuel_defaults = {
-    "HTPB": {
-        "yakıt_uzunluğu": "0.5",  # m
-        "yakıt_kalınlığı": "0.2",  # m
-        "yanma_hızı": "0.01",  # m/s
-        "karakteristik_hız": "1600"  # m/s
-    },
-    "Nitrocellulose": {
-        "yakıt_uzunluğu": "0.6",  # m
-        "yakıt_kalınlığı": "0.035",  # m
-        "yanma_hızı": "0.006",  # m/s
-        "karakteristik_hız": "1500"  # m/s
-    },
-    "Ammonium Perchlorate": {
-        "yakıt_uzunluğu": "0.55",  # m
-        "yakıt_kalınlığı": "0.037",  # m
-        "yanma_hızı": "0.014",  # m/s
-        "karakteristik_hız": "1700"  # m/s
-    },
-    # İhtiyaç duyarsanız daha fazla yakıt türü ekleyebilirsiniz
-}
-
-# Sıvı yakıt türleri ve varsayılan parametreler
-liquid_fuel_defaults = {
-    "RP-1 / LOX (355 J/kg*K, γ=1.21)": {
-        "yanma_odası_basıncı": "1e6",  # Pa
-        "egzoz_cıkış_basıncı": "101325",  # Pa
-        "yanma_odası_sıcaklığı": "3500",  # K
-        "boğaz_çapı": "51.6",  # mm
-        "egzoz_cıkış_çapı": "103.2",  # mm
-        "ortam_basıncı": "101325"  # Pa
-    },
-    "LH2 / LOX (4124 J/kg*K, γ=1.4)": {
-        "yanma_odası_basıncı": "2e6",  # Pa
-        "egzoz_cıkış_basıncı": "101325",  # Pa
-        "yanma_odası_sıcaklığı": "4000",  # K
-        "boğaz_çapı": "30",  # mm
-        "egzoz_cıkış_çapı": "60",  # mm
-        "ortam_basıncı": "101325"  # Pa
-    },
-    # Diğer sıvı yakıtlar için de benzer şekilde ekleyebilirsiniz
-}
-
-# -------------------- TKINTER ARAYÜZ KURULUMU --------------------
-root = tk.Tk()
-root.title("Roket Motoru Hesaplama (Katı / Sıvı)")
-root.geometry("800x600")  # Daha kompakt bir pencere boyutu belirledik
-root.minsize(700, 500)  # Minimum boyut belirleyerek küçük ekranlarda da düzgün görünmesini sağladık
-
-# Split the main window into left and right frames
-main_paned = ttk.PanedWindow(root, orient=tk.HORIZONTAL)
-main_paned.pack(fill=tk.BOTH, expand=True)
-
-# Left frame for parameters and controls
-left_frame = ttk.Frame(main_paned, relief=tk.SUNKEN)
-main_paned.add(left_frame, weight=1)
-
-# Right frame for calculation results and graphs
-right_frame = ttk.Frame(main_paned, relief=tk.SUNKEN)
-main_paned.add(right_frame, weight=1)
-
-# Create a scrollable canvas inside the left frame
-canvas_left = tk.Canvas(left_frame, borderwidth=0, background="#f0f0f0")
-scrollbar_left = ttk.Scrollbar(left_frame, orient="vertical", command=canvas_left.yview)
-scrollable_frame = ttk.Frame(canvas_left, padding="10")
-
-scrollable_frame.bind(
-    "<Configure>",
-    lambda e: canvas_left.configure(
-        scrollregion=canvas_left.bbox("all")
-    )
-)
-
-canvas_left.create_window((0, 0), window=scrollable_frame, anchor="nw")
-canvas_left.configure(yscrollcommand=scrollbar_left.set)
-
-canvas_left.pack(side="left", fill="both", expand=True)
-scrollbar_left.pack(side="right", fill="y")
-
-# Add mouse wheel scrolling
-def _on_mousewheel(event):
-    if root.tk.call('tk', 'windowingsystem') == 'win32':
-        canvas_left.yview_scroll(int(-1*(event.delta/120)), "units")
-    elif root.tk.call('tk', 'windowingsystem') == 'x11':
-        if event.num == 4:
-            canvas_left.yview_scroll(-1, "units")
-        elif event.num == 5:
-            canvas_left.yview_scroll(1, "units")
-    elif root.tk.call('tk', 'windowingsystem') == 'aqua':
-        canvas_left.yview_scroll(int(-1*(event.delta)), "units")
-
-canvas_left.bind_all("<MouseWheel>", _on_mousewheel)
-canvas_left.bind_all("<Button-4>", _on_mousewheel)
-canvas_left.bind_all("<Button-5>", _on_mousewheel)
-
-# Set mainframe to scrollable_frame
-mainframe = scrollable_frame
-
-# 1) Yakıt Türü Seçimi
-rocket_type_var = tk.StringVar()
-rocket_type_label = ttk.Label(mainframe, text="Yakıt Türü Seçiniz:")
-rocket_type_label.grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
-
-rocket_type_combo = ttk.Combobox(mainframe, textvariable=rocket_type_var,
-                                 values=["Sıvı Yakıt", "Katı Yakıt"], state="readonly")
-rocket_type_combo.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
-rocket_type_combo.set("Sıvı Yakıt")  # Varsayılan
-rocket_type_combo.bind("<<ComboboxSelected>>", toggle_frames)
-
-# ---------------- SIVI YAKIT ALANLARI ----------------
-liquid_frame = ttk.LabelFrame(mainframe, text="Sıvı Yakıt Parametreleri")
-liquid_frame.grid(row=1, column=0, columnspan=2, pady=5, sticky="ew")
-
-pair_var = tk.StringVar()
-pair_label = ttk.Label(liquid_frame, text="Yakıt / Oksitleyici:")
-pair_label.grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
-pair_menu = ttk.Combobox(liquid_frame, textvariable=pair_var,
-                         values=list(liquid_fuel_defaults.keys()), state="readonly")
-pair_menu.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
-pair_var.set(list(liquid_fuel_defaults.keys())[0])  # Varsayılan
-
-ttk.Label(liquid_frame, text="Yanma Odası Basıncı (Pa):").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
-chamber_pressure_entry = ttk.Entry(liquid_frame, width=15)
-chamber_pressure_entry.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
-create_tooltip(chamber_pressure_entry, "Yanma odası basıncı (Pa)")
-
-ttk.Label(liquid_frame, text="Egzoz Çıkış Basıncı (Pa):").grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
-exit_pressure_entry = ttk.Entry(liquid_frame, width=15)
-exit_pressure_entry.grid(row=2, column=1, padx=5, pady=5, sticky="ew")
-create_tooltip(exit_pressure_entry, "Egzoz çıkış basıncı (Pa)")
-
-ttk.Label(liquid_frame, text="Yanma Odası Sıcaklığı (K):").grid(row=3, column=0, sticky=tk.W, padx=5, pady=5)
-chamber_temperature_entry = ttk.Entry(liquid_frame, width=15)
-chamber_temperature_entry.grid(row=3, column=1, padx=5, pady=5, sticky="ew")
-create_tooltip(chamber_temperature_entry, "Yanma odası sıcaklığı (K)")
-
-ttk.Label(liquid_frame, text="Boğaz Çapı (mm):").grid(row=4, column=0, sticky=tk.W, padx=5, pady=5)
-throat_diameter_entry = ttk.Entry(liquid_frame, width=15)
-throat_diameter_entry.grid(row=4, column=1, padx=5, pady=5, sticky="ew")
-create_tooltip(throat_diameter_entry, "Boğaz çapı (mm)")
-
-ttk.Label(liquid_frame, text="Egzoz Çıkış Çapı (mm):").grid(row=5, column=0, sticky=tk.W, padx=5, pady=5)
-exit_diameter_entry = ttk.Entry(liquid_frame, width=15)
-exit_diameter_entry.grid(row=5, column=1, padx=5, pady=5, sticky="ew")
-create_tooltip(exit_diameter_entry, "Egzoz çıkış çapı (mm)")
-
-ttk.Label(liquid_frame, text="Ortam Basıncı (Pa):").grid(row=6, column=0, sticky=tk.W, padx=5, pady=5)
-ambient_pressure_entry = ttk.Entry(liquid_frame, width=15)
-ambient_pressure_entry.grid(row=6, column=1, padx=5, pady=5, sticky="ew")
-create_tooltip(ambient_pressure_entry, "Ortam basıncı (Pa)")
-
-# ---------------- KATI YAKIT ALANLARI ----------------
-solid_frame = ttk.LabelFrame(mainframe, text="Katı Yakıt Parametreleri")
-solid_frame.grid(row=2, column=0, columnspan=2, pady=5, sticky="ew")
-solid_frame.grid_remove()  # Başlangıçta gizli
-
-# Basitleştirilmiş katı yakıt parametreleri
-solid_fuel_var = tk.StringVar()
-ttk.Label(solid_frame, text="Yakıt Türü:").grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
-solid_fuel_combo = ttk.Combobox(solid_frame, textvariable=solid_fuel_var,
-                                values=list(solid_fuels.keys()), state="readonly")
-solid_fuel_combo.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
-solid_fuel_combo.set("HTPB")  # Varsayılan
-solid_fuel_combo.bind("<<ComboboxSelected>>", on_solid_fuel_selected)
-
-ttk.Label(solid_frame, text="Yakıtın Uzunluğu (m):").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
-length_entry = ttk.Entry(solid_frame, width=15)
-length_entry.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
-create_tooltip(length_entry, "Yakıtın uzunluğu (m)")
-
-ttk.Label(solid_frame, text="Yakıtın Kalınlığı (m):").grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
-thickness_entry = ttk.Entry(solid_frame, width=15)
-thickness_entry.grid(row=2, column=1, padx=5, pady=5, sticky="ew")
-create_tooltip(thickness_entry, "Yakıtın kalınlığı (m)")
-
-ttk.Label(solid_frame, text="Yanma Hızı (m/s):").grid(row=3, column=0, sticky=tk.W, padx=5, pady=5)
-burn_rate_entry = ttk.Entry(solid_frame, width=15)
-burn_rate_entry.grid(row=3, column=1, padx=5, pady=5, sticky="ew")
-create_tooltip(burn_rate_entry, "Yanma hızı (m/s)")
-
-ttk.Label(solid_frame, text="Karakteristik Hız (c*):").grid(row=4, column=0, sticky=tk.W, padx=5, pady=5)
-cstar_entry = ttk.Entry(solid_frame, width=15)
-cstar_entry.grid(row=4, column=1, padx=5, pady=5, sticky="ew")
-create_tooltip(cstar_entry, "Karakteristik hız (c*)")
-
-# Özel Yakıt Ekleme Butonu
-ttk.Button(solid_frame, text="Özel Yakıt Ekle", command=add_custom_fuel).grid(row=5, column=0, columnspan=2, pady=10, sticky="ew")
-
-# -------------------- Zaman Parametreleri --------------------
-time_frame = ttk.LabelFrame(mainframe, text="Zaman Parametreleri")
-time_frame.grid(row=3, column=0, columnspan=2, pady=5, sticky="ew")
-
-ttk.Label(time_frame, text="Yanma Süresi (s):").grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
-burn_time_entry = ttk.Entry(time_frame, width=15)
-burn_time_entry.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
-burn_time_entry.insert(0, "10")  # Varsayılan yanma süresi
-create_tooltip(burn_time_entry, "Roket motorunun yanma süresi (s)")
-
-ttk.Label(time_frame, text="Zaman Adımı (s):").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
-time_step_entry = ttk.Entry(time_frame, width=15)
-time_step_entry.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
-time_step_entry.insert(0, "1")  # Varsayılan zaman adımı
-create_tooltip(time_step_entry, "Hesaplamaların yapılacağı zaman adımı (s)")
-
-# -------------------- Birim Seçimi Fonksiyonları --------------------
-length_unit_var = tk.StringVar()
-pressure_unit_var = tk.StringVar()
-mass_unit_var = tk.StringVar()
-temperature_unit_var = tk.StringVar()
-
-create_unit_selection()
-
-# -------------------- Kullanıcı Profili Arayüzü --------------------
-create_profile_management()
-
-# -------------------- Sonuç Gösterme --------------------
+# -------------------- Sonuç Gösterme ve Hesaplama Detayları --------------------
+# Sonuç Gösterme
 result_text = tk.StringVar()
 result_label = ttk.Label(right_frame, textvariable=result_text, foreground="blue", justify="left", anchor="nw")
 result_label.pack(fill='both', expand=True, padx=10, pady=10)
 
-# -------------------- Hesaplama Butonu --------------------
-calculate_button = ttk.Button(mainframe, text="Hesapla", command=calculate)
-calculate_button.grid(row=4, column=0, columnspan=2, pady=10, sticky="ew")
+# Hesaplama Detayları İçin Checkbox ve Metin Kutusu
+details_frame = ttk.Frame(right_frame)
+details_frame.pack(pady=5, fill='x', padx=10)
 
-# -------------------- Sağ Taraf İçin Grafik ve Eğitim Modülü --------------------
-# Grafik butonları için ayrı bir Frame oluşturuyoruz
-graph_buttons_frame = ttk.LabelFrame(right_frame, text="Grafikler")
-graph_buttons_frame.pack(fill='x', padx=5, pady=5)
+show_details_var = tk.BooleanVar()
+show_details_check = ttk.Checkbutton(details_frame, text="Hesaplama Detaylarını Göster", variable=show_details_var,
+                                     command=lambda: toggle_details())
+show_details_check.pack(side='left')
 
-# Grafik butonları
-ttk.Button(graph_buttons_frame, text="İtki Kuvveti Grafiği", command=plot_thrust_graph).grid(row=0, column=0, padx=5, pady=5, sticky="ew")
-ttk.Button(graph_buttons_frame, text="Kütle Akış Hızı Grafiği", command=plot_mass_flow_graph).grid(row=0, column=1, padx=5, pady=5, sticky="ew")
-ttk.Button(graph_buttons_frame, text="Egzoz Hızı Grafiği", command=plot_exit_velocity_graph).grid(row=0, column=2, padx=5, pady=5, sticky="ew")
+calculation_details_text = tk.Text(right_frame, wrap="word", height=15, state=tk.DISABLED, background="#f0f0f0")
+calculation_details_text.pack(fill='both', expand=True, padx=10, pady=5)
 
-# Grafik butonlarının eşit sütun genişliği alması için sütun ağırlıklarını ayarlıyoruz
-for i in range(3):
-    graph_buttons_frame.columnconfigure(i, weight=1)
-
-# Eğitim Modülü Butonu
-ttk.Button(right_frame, text="Eğitim Modülünü Aç", command=open_training_module).pack(pady=10, fill='x', padx=5)
+def toggle_details():
+    """
+    Checkbox durumuna göre hesaplama detaylarını gösterir veya gizler.
+    """
+    if show_details_var.get():
+        calculation_details_text.pack(fill='both', expand=True, padx=10, pady=5)
+    else:
+        calculation_details_text.pack_forget()
 
 # -------------------- Uygulama Başlatma --------------------
-# Varsayılan yakıt seçildiğinde parametreleri yükle
-toggle_frames()
+def main():
+    # Katı yakıt türleri ve varsayılan parametreler
+    solid_fuels = {
+        "HTPB": (0.01, 1600),  # (burn_rate [m/s], c_star [m/s])
+        "Nitrocellulose": (0.005, 1500),
+        "Ammonium Perchlorate": (0.015, 1700)
+    }
 
-root.mainloop()
+    # Katı yakıt türleri için varsayılan parametreler
+    solid_fuel_defaults = {
+        "HTPB": {
+            "yakıt_uzunluğu": "0.5",  # m
+            "yakıt_kalınlığı": "0.2",  # m
+            "yanma_hızı": "0.01",  # m/s
+            "karakteristik_hız": "1600"  # m/s
+        },
+        "Nitrocellulose": {
+            "yakıt_uzunluğu": "0.6",  # m
+            "yakıt_kalınlığı": "0.035",  # m
+            "yanma_hızı": "0.006",  # m/s
+            "karakteristik_hız": "1500"  # m/s
+        },
+        "Ammonium Perchlorate": {
+            "yakıt_uzunluğu": "0.55",  # m
+            "yakıt_kalınlığı": "0.037",  # m
+            "yanma_hızı": "0.014",  # m/s
+            "karakteristik_hız": "1700"  # m/s
+        },
+        # İhtiyaç duyarsanız daha fazla yakıt türü ekleyebilirsiniz
+    }
+
+    # Sıvı yakıt türleri ve varsayılan parametreler
+    liquid_fuel_defaults = {
+        "RP-1 / LOX (355 J/kg*K, γ=1.21)": {
+            "yanma_odası_basıncı": "1e6",  # Pa
+            "egzoz_cıkış_basıncı": "101325",  # Pa
+            "yanma_odası_sıcaklığı": "3500",  # K
+            "boğaz_çapı": "51.6",  # mm
+            "egzoz_cıkış_çapı": "103.2",  # mm
+            "ortam_basıncı": "101325"  # Pa
+        },
+        "LH2 / LOX (4124 J/kg*K, γ=1.4)": {
+            "yanma_odası_basıncı": "2e6",  # Pa
+            "egzoz_cıkış_basıncı": "101325",  # Pa
+            "yanma_odası_sıcaklığı": "4000",  # K
+            "boğaz_çapı": "30",  # mm
+            "egzoz_cıkış_çapı": "60",  # mm
+            "ortam_basıncı": "101325"  # Pa
+        },
+        # Diğer sıvı yakıtlar için de benzer şekilde ekleyebilirsiniz
+    }
+
+    # TKINTER ARAYÜZ KURULUMU
+    root = tk.Tk()
+    root.title("Roket Motoru Hesaplama (Katı / Sıvı)")
+    root.geometry("1000x700")  # Daha geniş bir pencere boyutu belirledik
+    root.minsize(900, 600)  # Minimum boyut belirleyerek küçük ekranlarda da düzgün görünmesini sağladık
+
+    # Split the main window into left and right frames
+    main_paned = ttk.PanedWindow(root, orient=tk.HORIZONTAL)
+    main_paned.pack(fill=tk.BOTH, expand=True)
+
+    # Left frame for parameters and controls
+    left_frame = ttk.Frame(main_paned, relief=tk.SUNKEN)
+    main_paned.add(left_frame, weight=1)
+
+    # Right frame for calculation results and graphs
+    right_frame = ttk.Frame(main_paned, relief=tk.SUNKEN)
+    main_paned.add(right_frame, weight=1)
+
+    # Create a scrollable canvas inside the left frame
+    canvas_left = tk.Canvas(left_frame, borderwidth=0, background="#f0f0f0")
+    scrollbar_left = ttk.Scrollbar(left_frame, orient="vertical", command=canvas_left.yview)
+    scrollable_frame = ttk.Frame(canvas_left, padding="10")
+
+    scrollable_frame.bind(
+        "<Configure>",
+        lambda e: canvas_left.configure(
+            scrollregion=canvas_left.bbox("all")
+        )
+    )
+
+    canvas_left.create_window((0, 0), window=scrollable_frame, anchor="nw")
+    canvas_left.configure(yscrollcommand=scrollbar_left.set)
+
+    canvas_left.pack(side="left", fill="both", expand=True)
+    scrollbar_left.pack(side="right", fill="y")
+
+    # Add mouse wheel scrolling
+    def _on_mousewheel(event):
+        if root.tk.call('tk', 'windowingsystem') == 'win32':
+            canvas_left.yview_scroll(int(-1*(event.delta/120)), "units")
+        elif root.tk.call('tk', 'windowingsystem') == 'x11':
+            if event.num == 4:
+                canvas_left.yview_scroll(-1, "units")
+            elif event.num == 5:
+                canvas_left.yview_scroll(1, "units")
+        elif root.tk.call('tk', 'windowingsystem') == 'aqua':
+            canvas_left.yview_scroll(int(-1*(event.delta)), "units")
+
+    canvas_left.bind_all("<MouseWheel>", _on_mousewheel)
+    canvas_left.bind_all("<Button-4>", _on_mousewheel)
+    canvas_left.bind_all("<Button-5>", _on_mousewheel)
+
+    # Set mainframe to scrollable_frame
+    mainframe = scrollable_frame
+
+    # 1) Yakıt Türü Seçimi
+    rocket_type_var = tk.StringVar()
+    rocket_type_label = ttk.Label(mainframe, text="Yakıt Türü Seçiniz:")
+    rocket_type_label.grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
+
+    rocket_type_combo = ttk.Combobox(mainframe, textvariable=rocket_type_var,
+                                     values=["Sıvı Yakıt", "Katı Yakıt"], state="readonly")
+    rocket_type_combo.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
+    rocket_type_combo.set("Sıvı Yakıt")  # Varsayılan
+    rocket_type_combo.bind("<<ComboboxSelected>>", toggle_frames)
+
+    # ---------------- SIVI YAKIT ALANLARI ----------------
+    liquid_frame = ttk.LabelFrame(mainframe, text="Sıvı Yakıt Parametreleri")
+    liquid_frame.grid(row=1, column=0, columnspan=2, pady=5, sticky="ew")
+
+    pair_var = tk.StringVar()
+    pair_label = ttk.Label(liquid_frame, text="Yakıt / Oksitleyici:")
+    pair_label.grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
+    pair_menu = ttk.Combobox(liquid_frame, textvariable=pair_var,
+                             values=list(liquid_fuel_defaults.keys()), state="readonly")
+    pair_menu.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
+    pair_var.set(list(liquid_fuel_defaults.keys())[0])  # Varsayılan
+
+    ttk.Label(liquid_frame, text="Yanma Odası Basıncı (Pa):").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
+    chamber_pressure_entry = ttk.Entry(liquid_frame, width=15)
+    chamber_pressure_entry.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
+    create_tooltip(chamber_pressure_entry, "Yanma odası basıncı (Pa)")
+
+    ttk.Label(liquid_frame, text="Egzoz Çıkış Basıncı (Pa):").grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
+    exit_pressure_entry = ttk.Entry(liquid_frame, width=15)
+    exit_pressure_entry.grid(row=2, column=1, padx=5, pady=5, sticky="ew")
+    create_tooltip(exit_pressure_entry, "Egzoz çıkış basıncı (Pa)")
+
+    ttk.Label(liquid_frame, text="Yanma Odası Sıcaklığı (K):").grid(row=3, column=0, sticky=tk.W, padx=5, pady=5)
+    chamber_temperature_entry = ttk.Entry(liquid_frame, width=15)
+    chamber_temperature_entry.grid(row=3, column=1, padx=5, pady=5, sticky="ew")
+    create_tooltip(chamber_temperature_entry, "Yanma odası sıcaklığı (K)")
+
+    ttk.Label(liquid_frame, text="Boğaz Çapı (mm):").grid(row=4, column=0, sticky=tk.W, padx=5, pady=5)
+    throat_diameter_entry = ttk.Entry(liquid_frame, width=15)
+    throat_diameter_entry.grid(row=4, column=1, padx=5, pady=5, sticky="ew")
+    create_tooltip(throat_diameter_entry, "Boğaz çapı (mm)")
+
+    ttk.Label(liquid_frame, text="Egzoz Çıkış Çapı (mm):").grid(row=5, column=0, sticky=tk.W, padx=5, pady=5)
+    exit_diameter_entry = ttk.Entry(liquid_frame, width=15)
+    exit_diameter_entry.grid(row=5, column=1, padx=5, pady=5, sticky="ew")
+    create_tooltip(exit_diameter_entry, "Egzoz çıkış çapı (mm)")
+
+    ttk.Label(liquid_frame, text="Ortam Basıncı (Pa):").grid(row=6, column=0, sticky=tk.W, padx=5, pady=5)
+    ambient_pressure_entry = ttk.Entry(liquid_frame, width=15)
+    ambient_pressure_entry.grid(row=6, column=1, padx=5, pady=5, sticky="ew")
+    create_tooltip(ambient_pressure_entry, "Ortam basıncı (Pa)")
+
+    # ---------------- KATI YAKIT ALANLARI ----------------
+    solid_frame = ttk.LabelFrame(mainframe, text="Katı Yakıt Parametreleri")
+    solid_frame.grid(row=2, column=0, columnspan=2, pady=5, sticky="ew")
+    solid_frame.grid_remove()  # Başlangıçta gizli
+
+    # Basitleştirilmiş katı yakıt parametreleri
+    solid_fuel_var = tk.StringVar()
+    ttk.Label(solid_frame, text="Yakıt Türü:").grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
+    solid_fuel_combo = ttk.Combobox(solid_frame, textvariable=solid_fuel_var,
+                                    values=list(solid_fuels.keys()), state="readonly")
+    solid_fuel_combo.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
+    solid_fuel_combo.set("HTPB")  # Varsayılan
+    solid_fuel_combo.bind("<<ComboboxSelected>>", on_solid_fuel_selected)
+
+    ttk.Label(solid_frame, text="Yakıtın Uzunluğu (m):").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
+    length_entry = ttk.Entry(solid_frame, width=15)
+    length_entry.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
+    create_tooltip(length_entry, "Yakıtın uzunluğu (m)")
+
+    ttk.Label(solid_frame, text="Yakıtın Kalınlığı (m):").grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
+    thickness_entry = ttk.Entry(solid_frame, width=15)
+    thickness_entry.grid(row=2, column=1, padx=5, pady=5, sticky="ew")
+    create_tooltip(thickness_entry, "Yakıtın kalınlığı (m)")
+
+    ttk.Label(solid_frame, text="Yanma Hızı (m/s):").grid(row=3, column=0, sticky=tk.W, padx=5, pady=5)
+    burn_rate_entry = ttk.Entry(solid_frame, width=15)
+    burn_rate_entry.grid(row=3, column=1, padx=5, pady=5, sticky="ew")
+    create_tooltip(burn_rate_entry, "Yanma hızı (m/s)")
+
+    ttk.Label(solid_frame, text="Karakteristik Hız (c*):").grid(row=4, column=0, sticky=tk.W, padx=5, pady=5)
+    cstar_entry = ttk.Entry(solid_frame, width=15)
+    cstar_entry.grid(row=4, column=1, padx=5, pady=5, sticky="ew")
+    create_tooltip(cstar_entry, "Karakteristik hız (c*)")
+
+    # Özel Yakıt Ekleme Butonu
+    ttk.Button(solid_frame, text="Özel Yakıt Ekle", command=add_custom_fuel).grid(row=5, column=0, columnspan=2, pady=10, sticky="ew")
+
+    # -------------------- Zaman Parametreleri --------------------
+    time_frame = ttk.LabelFrame(mainframe, text="Zaman Parametreleri")
+    time_frame.grid(row=3, column=0, columnspan=2, pady=5, sticky="ew")
+
+    ttk.Label(time_frame, text="Yanma Süresi (s):").grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
+    burn_time_entry = ttk.Entry(time_frame, width=15)
+    burn_time_entry.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
+    burn_time_entry.insert(0, "10")  # Varsayılan yanma süresi
+    create_tooltip(burn_time_entry, "Roket motorunun yanma süresi (s)")
+
+    ttk.Label(time_frame, text="Zaman Adımı (s):").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
+    time_step_entry = ttk.Entry(time_frame, width=15)
+    time_step_entry.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
+    time_step_entry.insert(0, "1")  # Varsayılan zaman adımı
+    create_tooltip(time_step_entry, "Hesaplamaların yapılacağı zaman adımı (s)")
+
+    # -------------------- Birim Seçimi Fonksiyonları --------------------
+    length_unit_var = tk.StringVar()
+    pressure_unit_var = tk.StringVar()
+    mass_unit_var = tk.StringVar()
+    temperature_unit_var = tk.StringVar()
+    force_unit_var = tk.StringVar()
+
+    create_unit_selection()
+
+    # -------------------- Kullanıcı Profili Arayüzü --------------------
+    create_profile_management()
+
+    # -------------------- Sonuç Gösterme ve Hesaplama Detayları --------------------
+    # Sonuç Gösterme
+    result_text = tk.StringVar()
+    result_label = ttk.Label(right_frame, textvariable=result_text, foreground="blue", justify="left", anchor="nw")
+    result_label.pack(fill='both', expand=True, padx=10, pady=10)
+
+    # Hesaplama Detayları İçin Checkbox ve Metin Kutusu
+    details_frame = ttk.Frame(right_frame)
+    details_frame.pack(pady=5, fill='x', padx=10)
+
+    show_details_var = tk.BooleanVar()
+    show_details_check = ttk.Checkbutton(details_frame, text="Hesaplama Detaylarını Göster", variable=show_details_var,
+                                         command=lambda: toggle_details())
+    show_details_check.pack(side='left')
+
+    calculation_details_text = tk.Text(right_frame, wrap="word", height=15, state=tk.DISABLED, background="#f0f0f0")
+    calculation_details_text.pack(fill='both', expand=True, padx=10, pady=5)
+
+    def toggle_details():
+        """
+        Checkbox durumuna göre hesaplama detaylarını gösterir veya gizler.
+        """
+        if show_details_var.get():
+            calculation_details_text.pack(fill='both', expand=True, padx=10, pady=5)
+        else:
+            calculation_details_text.pack_forget()
+
+    # -------------------- Hesaplama Butonu --------------------
+    calculate_button = ttk.Button(mainframe, text="Hesapla", command=calculate)
+    calculate_button.grid(row=4, column=0, columnspan=2, pady=10, sticky="ew")
+
+    # -------------------- Sağ Taraf İçin Grafik ve Eğitim Modülü --------------------
+    # Grafik butonları için ayrı bir Frame oluşturuyoruz
+    graph_buttons_frame = ttk.LabelFrame(right_frame, text="Grafikler")
+    graph_buttons_frame.pack(fill='x', padx=5, pady=5)
+
+    # Grafik butonları
+    ttk.Button(graph_buttons_frame, text="İtki Kuvveti Grafiği", command=plot_thrust_graph).grid(row=0, column=0, padx=5, pady=5, sticky="ew")
+    ttk.Button(graph_buttons_frame, text="Kütle Akış Hızı Grafiği", command=plot_mass_flow_graph).grid(row=0, column=1, padx=5, pady=5, sticky="ew")
+    ttk.Button(graph_buttons_frame, text="Egzoz Hızı Grafiği", command=plot_exit_velocity_graph).grid(row=0, column=2, padx=5, pady=5, sticky="ew")
+
+    # Grafik butonlarının eşit sütun genişliği alması için sütun ağırlıklarını ayarlıyoruz
+    for i in range(3):
+        graph_buttons_frame.columnconfigure(i, weight=1)
+
+    # Eğitim Modülü Butonu
+    ttk.Button(right_frame, text="Eğitim Modülünü Aç", command=open_training_module).pack(pady=10, fill='x', padx=5)
+
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
